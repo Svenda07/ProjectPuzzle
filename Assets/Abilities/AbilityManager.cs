@@ -1,0 +1,49 @@
+using UnityEngine;
+
+public class AbilityManager : MonoBehaviour
+{
+    public static AbilityManager Instance { get; private set; }
+
+    public bool JumpUnlocked { get; private set; }
+    public bool SprintUnlocked { get; private set; }
+    public bool CrouchUnlocked { get; private set; }
+    public bool DashUnlocked { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        // Starting state: only walking is available
+        JumpUnlocked = false;
+        SprintUnlocked = false;
+        CrouchUnlocked = false;
+        DashUnlocked = false;
+    }
+
+    public void UnlockJump()
+    {
+        JumpUnlocked = true;
+    }
+
+    public void UnlockSprint()
+    {
+        SprintUnlocked = true;
+    }
+
+    public void UnlockCrouch()
+    {
+        CrouchUnlocked = true;
+    }
+
+    public void UnlockDash()
+    {
+        DashUnlocked = true;
+    }
+}
