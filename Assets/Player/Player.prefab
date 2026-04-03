@@ -326,9 +326,8 @@ MonoBehaviour:
   walkSpeed: 3
   sprintMultiplier: 2
   jumpForce: 5
-  gravityMultiplier: 1
-  airControlMultiplier: 0.2
-  mouseSensitivity: 0.1
+  gravityMultiplier: 0.75
+  mouseSensitivity: 0.5
   upDownLookRange: 80
   crouchHeight: 1
   standingHeight: 2
@@ -338,6 +337,18 @@ MonoBehaviour:
   dashSpeed: 12
   dashDuration: 0.2
   dashCooldown: 1
+  airControl: 2
+  maxWalkableSlopeAngle: 35
+  slopeSlideSpeed: 8
+  grappableLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  maxGrappleDistance: 20
+  grapplePullSpeed: 20
+  grappleOrigin: {fileID: 0}
+  grappleLine: {fileID: 0}
+  normalReticle: {fileID: 0}
+  validGrappleReticle: {fileID: 0}
   characterController: {fileID: 6753114458513448084}
   mainCamera: {fileID: 4621096794294748361}
   playerInputHandler: {fileID: 0}

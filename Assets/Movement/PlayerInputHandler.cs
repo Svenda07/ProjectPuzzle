@@ -20,6 +20,7 @@ public class PlayerInputHandler : MonoBehaviour
     [SerializeField] private string sprint = "Sprint";
     [SerializeField] private string crouch = "Crouch";
     [SerializeField] private string dash = "Dash";
+    [SerializeField] private string grapplePull = "GrapplePull";
 
 
     private InputAction movementAction;
@@ -28,6 +29,7 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction sprintAction;
     private InputAction crouchAction;
     private InputAction dashAction;
+    private InputAction grapplePullAction;
 
 
     public Vector2 MovementInput { get; private set; }
@@ -36,6 +38,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool SprintTriggered { get; private set; }
     public bool CrouchTriggered { get; private set; }
     public bool DashTriggered { get; private set; }
+    public bool GrapplePullTriggered { get; private set; }
+
 
 
     private void Awake()
@@ -49,7 +53,8 @@ public class PlayerInputHandler : MonoBehaviour
         sprintAction = mapReference.FindAction(sprint);
         crouchAction = mapReference.FindAction(crouch);
         dashAction = mapReference.FindAction(dash);
-
+        grapplePullAction = mapReference.FindAction(grapplePull);
+  
 
 
 
@@ -73,20 +78,16 @@ public class PlayerInputHandler : MonoBehaviour
 
         sprintAction.performed += inputInfo => SprintTriggered = true;
         sprintAction.canceled += inputInfo => SprintTriggered = false;
-        crouchAction.performed += inputInfo =>
-        {
-            CrouchTriggered = true;
-            Debug.Log("Crouch performed");
-        };
-
-        crouchAction.canceled += inputInfo =>
-        {
-            CrouchTriggered = false;
-            Debug.Log("Crouch canceled");
-        };
-
+        
+        crouchAction.performed += inputInfo => CrouchTriggered = true;
+        crouchAction.canceled += inputInfo => CrouchTriggered = false;
+          
         dashAction.performed += inputInfo => DashTriggered = true;
         dashAction.canceled += inputInfo => DashTriggered = false;
+        
+        grapplePullAction.performed += inputInfo => GrapplePullTriggered = true;
+        grapplePullAction.canceled += inputInfo => GrapplePullTriggered = false;
+
     }
 
 

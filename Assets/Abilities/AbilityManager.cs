@@ -8,6 +8,7 @@ public class AbilityManager : MonoBehaviour
     public bool SprintUnlocked { get; private set; }
     public bool CrouchUnlocked { get; private set; }
     public bool DashUnlocked { get; private set; }
+    public bool GrappleUnlocked { get; private set; }
 
     private void Awake()
     {
@@ -25,6 +26,7 @@ public class AbilityManager : MonoBehaviour
         SprintUnlocked = false;
         CrouchUnlocked = false;
         DashUnlocked = false;
+        GrappleUnlocked = false;
     }
 
     public void UnlockJump()
@@ -45,5 +47,10 @@ public class AbilityManager : MonoBehaviour
     public void UnlockDash()
     {
         DashUnlocked = true;
+    }
+
+    public void UnlockGrapple()
+    {
+        GrappleUnlocked = true;
     }
 }
