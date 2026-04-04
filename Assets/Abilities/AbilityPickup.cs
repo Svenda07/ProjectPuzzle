@@ -8,7 +8,8 @@ public class AbilityPickup : MonoBehaviour
         Sprint,
         Crouch,
         Dash,
-        Grapple
+        Grapple,
+        objectPickup
     }
 
     [SerializeField] private AbilityType abilityType;
@@ -52,9 +53,15 @@ public class AbilityPickup : MonoBehaviour
             case AbilityType.Grapple:
                 AbilityManager.Instance.UnlockGrapple();
                 abilityName = "Grapple Hook";
-                buttonName = "Left Click / Right Click";
+                buttonName = "Right Click";
+                break;
+            case AbilityType.objectPickup:
+                AbilityManager.Instance.UnlockObjectPickup();
+                abilityName = "Object Pickup";
+                buttonName = "E";
                 break;
         }
+
 
         if (AbilityPopupUI.Instance != null)
         {

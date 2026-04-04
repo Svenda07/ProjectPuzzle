@@ -21,7 +21,9 @@ public class PlayerInputHandler : MonoBehaviour
     [SerializeField] private string crouch = "Crouch";
     [SerializeField] private string dash = "Dash";
     [SerializeField] private string grapplePull = "GrapplePull";
-
+    [SerializeField] private string objectPickup = "PickUp";
+    [SerializeField] private string objectThrow = "Throw";
+    [SerializeField] private string resetPickups = "ResetPickups";
 
     private InputAction movementAction;
     private InputAction rotationAction;
@@ -30,7 +32,9 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction crouchAction;
     private InputAction dashAction;
     private InputAction grapplePullAction;
-
+    private InputAction objectPickupAction;
+    private InputAction objectThrowAction;
+    private InputAction resetPickupsAction;
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 RotationInput { get; private set; }
@@ -40,6 +44,9 @@ public class PlayerInputHandler : MonoBehaviour
     public bool DashTriggered { get; private set; }
     public bool GrapplePullTriggered { get; private set; }
 
+    public bool ObjectPickupTriggered { get; private set; }
+    public bool ObjectThrowTriggered { get; private set; }
+    public bool ResetPickupsTriggered { get; private set; }
 
 
     private void Awake()
@@ -54,7 +61,11 @@ public class PlayerInputHandler : MonoBehaviour
         crouchAction = mapReference.FindAction(crouch);
         dashAction = mapReference.FindAction(dash);
         grapplePullAction = mapReference.FindAction(grapplePull);
-  
+        objectPickupAction = mapReference.FindAction(objectPickup);
+        objectThrowAction = mapReference.FindAction(objectThrow);
+        resetPickupsAction = mapReference.FindAction(resetPickups);
+
+
 
 
 
@@ -88,9 +99,17 @@ public class PlayerInputHandler : MonoBehaviour
         grapplePullAction.performed += inputInfo => GrapplePullTriggered = true;
         grapplePullAction.canceled += inputInfo => GrapplePullTriggered = false;
 
+        objectPickupAction.performed += inputInfo => ObjectPickupTriggered = true;
+        objectThrowAction.performed += inputInfo => ObjectThrowTriggered = true;
+        resetPickupsAction.performed += inputInfo => ResetPickupsTriggered = true;
     }
 
-
+    private void LateUpdate()
+    {
+        ObjectPickupTriggered = false;
+        ObjectThrowTriggered = false;
+        ResetPickupsTriggered = false;
+    }
     private void OnEnable()
     {
         playerControls.FindActionMap(actionMapName).Enable();
