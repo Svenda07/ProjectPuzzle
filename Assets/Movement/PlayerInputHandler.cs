@@ -43,6 +43,7 @@ public class PlayerInputHandler : MonoBehaviour
     public bool CrouchTriggered { get; private set; }
     public bool DashTriggered { get; private set; }
     public bool GrapplePullTriggered { get; private set; }
+    public bool JumpHeld { get; private set; }
 
     public bool ObjectPickupTriggered { get; private set; }
     public bool ObjectThrowTriggered { get; private set; }
@@ -83,8 +84,16 @@ public class PlayerInputHandler : MonoBehaviour
         rotationAction.canceled += inputInfo => RotationInput = Vector2.zero;
 
 
-        jumpAction.performed += inputInfo => JumpTriggered = true;
-        jumpAction.canceled += inputInfo => JumpTriggered = false;
+        jumpAction.performed += inputInfo =>
+        {
+            JumpTriggered = true;
+            JumpHeld = true;
+        };
+
+        jumpAction.canceled += inputInfo =>
+        {
+            JumpHeld = false;
+        };
 
 
         sprintAction.performed += inputInfo => SprintTriggered = true;
@@ -103,7 +112,10 @@ public class PlayerInputHandler : MonoBehaviour
         objectThrowAction.performed += inputInfo => ObjectThrowTriggered = true;
         resetPickupsAction.performed += inputInfo => ResetPickupsTriggered = true;
     }
-
+    public void ClearFrameInput()
+    {
+        JumpTriggered = false;
+    }
     private void LateUpdate()
     {
         ObjectPickupTriggered = false;

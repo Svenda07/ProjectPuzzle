@@ -12,6 +12,10 @@ public class AbilityManager : MonoBehaviour
 
     public bool objectPickupUnlocked { get; private set; }
 
+    public bool DoubleJumpUnlocked { get; private set; }
+
+    public bool GlideUnlocked { get; private set; }
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -30,6 +34,8 @@ public class AbilityManager : MonoBehaviour
         DashUnlocked = false;
         GrappleUnlocked = false;
         objectPickupUnlocked = false;
+        DoubleJumpUnlocked = false;
+        GlideUnlocked = false;
     }
 
     public void UnlockJump()
@@ -60,5 +66,15 @@ public class AbilityManager : MonoBehaviour
     public void UnlockObjectPickup()
     {
         objectPickupUnlocked = true;
+    }
+    public void UnlockDoubleJump()
+    {
+        DoubleJumpUnlocked = true;
+    }
+
+
+    public void UnlockGlide()
+    {
+        GlideUnlocked = true;
     }
 }

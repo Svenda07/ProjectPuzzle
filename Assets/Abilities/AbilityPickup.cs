@@ -9,7 +9,9 @@ public class AbilityPickup : MonoBehaviour
         Crouch,
         Dash,
         Grapple,
-        objectPickup
+        objectPickup,
+        DoubleJump,
+        Glide
     }
 
     [SerializeField] private AbilityType abilityType;
@@ -59,6 +61,16 @@ public class AbilityPickup : MonoBehaviour
                 AbilityManager.Instance.UnlockObjectPickup();
                 abilityName = "Object Pickup";
                 buttonName = "E";
+                break;
+            case AbilityType.DoubleJump:
+                AbilityManager.Instance.UnlockDoubleJump();
+                abilityName = "Double Jump";
+                buttonName = "Space";
+                break;
+            case AbilityType.Glide:
+                AbilityManager.Instance.UnlockGlide();
+                abilityName = "Glide";
+                buttonName = "Hold Space";
                 break;
         }
 

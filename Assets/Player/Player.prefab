@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1030371940943125452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5034463051584957124}
+  m_Layer: 0
+  m_Name: CameraEffectHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5034463051584957124
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1030371940943125452}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8812812062236915298}
+  m_Father: {fileID: 8348421684474469702}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3042313439706121499
 GameObject:
   m_ObjectHideFlags: 0
@@ -141,12 +173,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3298485132067086560}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.55, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.44475, y: -0.16943002, z: -0.06367}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8348421684474469702}
+  m_Father: {fileID: 5034463051584957124}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &4621096794294748361
 Camera:
@@ -283,7 +315,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8508835765983233275}
-  - {fileID: 8812812062236915298}
+  - {fileID: 5034463051584957124}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &6753114458513448084
@@ -352,3 +384,16 @@ MonoBehaviour:
   characterController: {fileID: 6753114458513448084}
   mainCamera: {fileID: 4621096794294748361}
   playerInputHandler: {fileID: 0}
+  grappleMomentumSmoothTime: 0.4
+  maxAirJumps: 1
+  extraJumpForce: 5
+  glideFallSpeed: -3
+  glideGravityMultiplier: 0.2
+  glideMoveBoost: 1.1
+  normalFOV: 80
+  dashFOV: 66
+  glideFOV: 92
+  fovSmoothTime: 0.15
+  cameraEffectHolder: {fileID: 0}
+  doubleJumpShakeDuration: 0.12
+  doubleJumpShakeAmount: 0.08
