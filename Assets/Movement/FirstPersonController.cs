@@ -55,12 +55,39 @@ public class FirstPersonController : MonoBehaviour
     [Header("Grapple Momentum")]
     [SerializeField] private float grappleMomentumSmoothTime = 0.4f;
 
+    [Header("Extra Jump")]
+
+    [SerializeField] private int maxAirJumps = 1;
+    [SerializeField] private float extraJumpForce = 5f;
+
+    [Header("Glide")]
+    [SerializeField] private float glideFallSpeed = -3f;
+   
+    [SerializeField] private float glideMoveBoost = 1.1f;
+
+    [Header("Camera Effects")]
+    [SerializeField] private float normalFOV = 80f;
+    [SerializeField] private float dashFOV = 66f;
+    [SerializeField] private float glideFOV = 92f;
+    [SerializeField] private float fovSmoothTime = 0.15f;
+
+    [SerializeField] private Transform cameraEffectHolder;
+    [SerializeField] private float doubleJumpShakeDuration = 0.12f;
+    [SerializeField] private float doubleJumpShakeAmount = 0.08f;
+
+    private bool isGliding;
+
+    private int airJumpsUsed;
+    private bool wasGroundedLastFrame;
+
     private Vector3 grappleReleaseMomentum;
     private float grappleMomentumXSmoothing;
     private float grappleMomentumZSmoothing;
 
 
-
+    private float fovVelocity;
+    private Coroutine doubleJumpShakeCoroutine;
+    private Vector3 cameraEffectHolderOriginalLocalPos;
 
     private Vector3 currentMovement;
     private float verticalRotation;
@@ -115,6 +142,12 @@ public class FirstPersonController : MonoBehaviour
 
         targetHeight = standingHeight;
         targetCameraLocalPosition = standingCameraLocalPosition;
+        mainCamera.fieldOfView = normalFOV;
+
+        if (cameraEffectHolder != null)
+        {
+            cameraEffectHolderOriginalLocalPos = cameraEffectHolder.localPosition;
+        }
     }
 
     void Update()
@@ -132,6 +165,30 @@ public class FirstPersonController : MonoBehaviour
         HandleGrapple();
         UpdateGrappleLine(); 
         UpdateReticle();
+        playerInputHandler.ClearFrameInput();
+        HandleGlide();
+        HandleCameraFOV();
+    }
+    private void HandleCameraFOV()
+    {
+        float targetFOV = normalFOV;
+
+        if (isDashing)
+        {
+            targetFOV = dashFOV;
+        }
+        else if (isGliding)
+        {
+            targetFOV = glideFOV;
+
+        }
+
+        mainCamera.fieldOfView = Mathf.SmoothDamp(
+            mainCamera.fieldOfView,
+            targetFOV,
+            ref fovVelocity,
+            fovSmoothTime
+        );
     }
 
     private Vector3 CalculateWorldDirection()
@@ -163,9 +220,12 @@ public class FirstPersonController : MonoBehaviour
     }
     private void HandleJumping()
     {
-        if (characterController.isGrounded)
+        bool isGrounded = characterController.isGrounded;
+
+        if (isGrounded)
         {
             currentMovement.y = -0.5f;
+            airJumpsUsed = 0;
 
             if (AbilityManager.Instance != null &&
                 AbilityManager.Instance.JumpUnlocked &&
@@ -178,8 +238,25 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
-            currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
+            bool canUseExtraJump =
+                AbilityManager.Instance != null &&
+                AbilityManager.Instance.DoubleJumpUnlocked &&
+                airJumpsUsed < maxAirJumps;
+
+            if (playerInputHandler.JumpTriggered && canUseExtraJump && currentMovement.y <= 0f)
+            {
+                currentMovement.y = extraJumpForce;
+                airJumpsUsed++;
+                TriggerDoubleJumpShake();
+            }
+
+            if (!isGliding)
+            {
+                currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
+            }
         }
+
+        wasGroundedLastFrame = isGrounded;
     }
 
     private void HandleMovement()
@@ -212,17 +289,10 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
-            currentMovement.x = Mathf.Lerp(
-                currentMovement.x,
-                targetHorizontalMovement.x + grappleReleaseMomentum.x,
-                airControl * Time.deltaTime
-            );
+            float currentAirControl = isGliding ? airControl * glideMoveBoost : airControl;
 
-            currentMovement.z = Mathf.Lerp(
-                currentMovement.z,
-                targetHorizontalMovement.z + grappleReleaseMomentum.z,
-                airControl * Time.deltaTime
-            );
+            currentMovement.x = Mathf.Lerp(currentMovement.x, targetHorizontalMovement.x, currentAirControl * Time.deltaTime);
+            currentMovement.z = Mathf.Lerp(currentMovement.z, targetHorizontalMovement.z, currentAirControl * Time.deltaTime);
         }
 
         grappleReleaseMomentum.x = Mathf.SmoothDamp(
@@ -240,6 +310,7 @@ public class FirstPersonController : MonoBehaviour
         );
 
         HandleJumping();
+        HandleGlide();
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
@@ -454,6 +525,56 @@ public class FirstPersonController : MonoBehaviour
         grappleLine.enabled = true;
         grappleLine.SetPosition(0, startPoint);
         grappleLine.SetPosition(1, endPoint);
+    }
+    private void HandleGlide()
+    {
+        isGliding = false;
+        
+
+        if (AbilityManager.Instance == null || !AbilityManager.Instance.GlideUnlocked)
+            return;
+
+        if (characterController.isGrounded)
+            return;
+
+        if (!playerInputHandler.JumpHeld)
+            return;
+
+        if (currentMovement.y > 0f)
+            return;
+
+        isGliding = true;
+        
+        currentMovement.y = Mathf.Max(currentMovement.y, glideFallSpeed);
+    }
+    private void TriggerDoubleJumpShake()
+    {
+        if (cameraEffectHolder == null)
+            return;
+
+        if (doubleJumpShakeCoroutine != null)
+        {
+            StopCoroutine(doubleJumpShakeCoroutine);
+        }
+
+        doubleJumpShakeCoroutine = StartCoroutine(DoubleJumpShakeRoutine());
+    }
+    private IEnumerator DoubleJumpShakeRoutine()
+    {
+        float elapsed = 0f;
+
+        while (elapsed < doubleJumpShakeDuration)
+        {
+            float offsetX = Random.Range(-doubleJumpShakeAmount, doubleJumpShakeAmount);
+            float offsetY = Random.Range(-doubleJumpShakeAmount, doubleJumpShakeAmount);
+
+            cameraEffectHolder.localPosition = cameraEffectHolderOriginalLocalPos + new Vector3(offsetX, offsetY, 0f);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        cameraEffectHolder.localPosition = cameraEffectHolderOriginalLocalPos;
     }
     private void ApplyHorizontalRotation(float rotationAmount)
     {
