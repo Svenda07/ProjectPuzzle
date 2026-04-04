@@ -35,10 +35,32 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float maxWalkableSlopeAngle = 35f;
     [SerializeField] private float slopeSlideSpeed = 8f;
 
+    [Header("Grapple")]
+    [SerializeField] private LayerMask grappableLayer;
+    private int grappleBlockerLayer => ~LayerMask.GetMask("Player");
+    [SerializeField] private float maxGrappleDistance = 20f;
+    [SerializeField] private float grapplePullSpeed = 20f;
+    [SerializeField] private Transform grappleOrigin;
+    [SerializeField] private LineRenderer grappleLine;
+
+    [Header("Reticle")]
+    [SerializeField] private GameObject normalReticle;
+    [SerializeField] private GameObject validGrappleReticle;
+
     [Header("References")]
     [SerializeField] private CharacterController characterController;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerInputHandler playerInputHandler;
+    
+    [Header("Grapple Momentum")]
+    [SerializeField] private float grappleMomentumSmoothTime = 0.4f;
+
+    private Vector3 grappleReleaseMomentum;
+    private float grappleMomentumXSmoothing;
+    private float grappleMomentumZSmoothing;
+
+
+
 
     private Vector3 currentMovement;
     private float verticalRotation;
@@ -56,6 +78,10 @@ public class FirstPersonController : MonoBehaviour
     private RaycastHit slopeHit;
     private bool isSlidingOnSlope;
 
+
+    private bool isPullGrappling;
+    private Vector3 grapplePoint;
+    private Vector3 grappleVelocity;
     private float CurrentSpeed
     {
         get
@@ -93,6 +119,7 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
+      
         if (dashCooldownTimer > 0f)
         {
             dashCooldownTimer -= Time.deltaTime;
@@ -102,6 +129,9 @@ public class FirstPersonController : MonoBehaviour
         HandleCrouch();
         HandleMovement();
         HandleRotation();
+        HandleGrapple();
+        UpdateGrappleLine(); 
+        UpdateReticle();
     }
 
     private Vector3 CalculateWorldDirection()
@@ -110,7 +140,27 @@ public class FirstPersonController : MonoBehaviour
         Vector3 worldDirection = transform.TransformDirection(inputDirection);
         return worldDirection.normalized;
     }
+    private void UpdateReticle()
+    {
+        if (normalReticle == null || validGrappleReticle == null)
+            return;
 
+        bool validTarget = false;
+
+        if (Physics.Raycast(
+            mainCamera.transform.position,
+            mainCamera.transform.forward,
+            out RaycastHit hit,
+            maxGrappleDistance,
+            grappleBlockerLayer,
+            QueryTriggerInteraction.Ignore))
+        {
+            validTarget = ((1 << hit.collider.gameObject.layer) & grappableLayer) != 0;
+        }
+
+        normalReticle.SetActive(!validTarget);
+        validGrappleReticle.SetActive(validTarget);
+    }
     private void HandleJumping()
     {
         if (characterController.isGrounded)
@@ -134,18 +184,22 @@ public class FirstPersonController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (isDashing)
-        {
-            HandleJumping();
-            return;
-        }
-
         Vector3 worldDirection = CalculateWorldDirection();
         Vector3 targetHorizontalMovement = worldDirection * CurrentSpeed;
 
         isSlidingOnSlope = OnSteepSlope();
 
-        if (isSlidingOnSlope)
+        if (isDashing)
+        {
+            currentMovement.x = dashDirection.x * dashSpeed;
+            currentMovement.z = dashDirection.z * dashSpeed;
+        }
+        else if (isPullGrappling)
+        {
+            currentMovement.x = grappleVelocity.x;
+            currentMovement.z = grappleVelocity.z;
+        }
+        else if (isSlidingOnSlope)
         {
             Vector3 slideDirection = GetSlopeSlideDirection();
             currentMovement.x = slideDirection.x * slopeSlideSpeed;
@@ -158,9 +212,32 @@ public class FirstPersonController : MonoBehaviour
         }
         else
         {
-            currentMovement.x = Mathf.Lerp(currentMovement.x, targetHorizontalMovement.x, airControl * Time.deltaTime);
-            currentMovement.z = Mathf.Lerp(currentMovement.z, targetHorizontalMovement.z, airControl * Time.deltaTime);
+            currentMovement.x = Mathf.Lerp(
+                currentMovement.x,
+                targetHorizontalMovement.x + grappleReleaseMomentum.x,
+                airControl * Time.deltaTime
+            );
+
+            currentMovement.z = Mathf.Lerp(
+                currentMovement.z,
+                targetHorizontalMovement.z + grappleReleaseMomentum.z,
+                airControl * Time.deltaTime
+            );
         }
+
+        grappleReleaseMomentum.x = Mathf.SmoothDamp(
+            grappleReleaseMomentum.x,
+            0f,
+            ref grappleMomentumXSmoothing,
+            grappleMomentumSmoothTime
+        );
+
+        grappleReleaseMomentum.z = Mathf.SmoothDamp(
+            grappleReleaseMomentum.z,
+            0f,
+            ref grappleMomentumZSmoothing,
+            grappleMomentumSmoothTime
+        );
 
         HandleJumping();
         characterController.Move(currentMovement * Time.deltaTime);
@@ -257,6 +334,13 @@ public class FirstPersonController : MonoBehaviour
 
         if (!isDashing && dashCooldownTimer <= 0f && playerInputHandler.DashTriggered)
         {
+            StopGrapple(false);
+
+            grappleReleaseMomentum = Vector3.zero;
+            grappleVelocity = Vector3.zero;
+            grappleMomentumXSmoothing = 0f;
+            grappleMomentumZSmoothing = 0f;
+
             isDashing = true;
             dashTimer = dashDuration;
             dashCooldownTimer = dashCooldown;
@@ -269,7 +353,6 @@ public class FirstPersonController : MonoBehaviour
         if (isDashing)
         {
             dashTimer -= Time.deltaTime;
-            characterController.Move(dashDirection * dashSpeed * Time.deltaTime);
 
             if (dashTimer <= 0f)
             {
@@ -277,7 +360,101 @@ public class FirstPersonController : MonoBehaviour
             }
         }
     }
+    private void HandleGrapple()
+    {
+        if (AbilityManager.Instance == null || !AbilityManager.Instance.GrappleUnlocked)
+            return;
 
+        if (playerInputHandler.GrapplePullTriggered && !isPullGrappling)
+        {
+            StartPullGrapple();
+        }
+
+        if (!playerInputHandler.GrapplePullTriggered && isPullGrappling)
+        {
+            StopGrapple();
+        }
+
+        if (isPullGrappling)
+        {
+            Vector3 directionToPoint = (grapplePoint - transform.position).normalized;
+            grappleVelocity = directionToPoint * grapplePullSpeed;
+
+            characterController.Move(grappleVelocity * Time.deltaTime);
+
+            if (Vector3.Distance(transform.position, grapplePoint) < 2f)
+            {
+                StopGrapple();
+            }
+        }
+    }
+
+    private void StartPullGrapple()
+    {
+        if (Physics.Raycast(
+            mainCamera.transform.position,
+            mainCamera.transform.forward,
+            out RaycastHit hit,
+            maxGrappleDistance,
+            grappleBlockerLayer,
+            QueryTriggerInteraction.Ignore))
+        {
+            if (((1 << hit.collider.gameObject.layer) & grappableLayer) != 0)
+            {
+                grapplePoint = hit.point;
+                isPullGrappling = true;
+                grappleVelocity = Vector3.zero;
+
+                if (grappleLine != null)
+                {
+                    grappleLine.enabled = true;
+                }
+            }
+        }
+    }
+
+    private void StopGrapple(bool preserveMomentum = true)
+    {
+        isPullGrappling = false;
+
+        if (preserveMomentum)
+        {
+            grappleReleaseMomentum = new Vector3(grappleVelocity.x, 0f, grappleVelocity.z);
+        }
+        else
+        {
+            grappleReleaseMomentum = Vector3.zero;
+            grappleVelocity = Vector3.zero;
+            grappleMomentumXSmoothing = 0f;
+            grappleMomentumZSmoothing = 0f;
+        }
+
+        if (grappleLine != null)
+        {
+            grappleLine.enabled = false;
+        }
+    }
+    private void UpdateGrappleLine()
+    {
+        if (grappleLine == null)
+            return;
+
+        if (!isPullGrappling)
+        {
+            grappleLine.enabled = false;
+            return;
+        }
+
+        Vector3 startPoint = grappleOrigin.position;
+        Vector3 direction = (grapplePoint - startPoint).normalized;
+        float actualDistance = Vector3.Distance(startPoint, grapplePoint);
+        float clampedDistance = Mathf.Min(actualDistance, maxGrappleDistance);
+        Vector3 endPoint = startPoint + direction * clampedDistance;
+
+        grappleLine.enabled = true;
+        grappleLine.SetPosition(0, startPoint);
+        grappleLine.SetPosition(1, endPoint);
+    }
     private void ApplyHorizontalRotation(float rotationAmount)
     {
         transform.Rotate(0, rotationAmount, 0);
