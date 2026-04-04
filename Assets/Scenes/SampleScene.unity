@@ -21695,6 +21695,10 @@ PrefabInstance:
       value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
+      propertyPath: jumpForce
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: normalReticle
       value: 
       objectReference: {fileID: 930224570}
