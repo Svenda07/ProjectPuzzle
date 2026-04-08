@@ -270,7 +270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8227154087831693400, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: m_Name
-      value: Player 1
+      value: PlayerFinal
       objectReference: {fileID: 0}
     - target: {fileID: 8227154087831693400, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: m_Layer
@@ -378,8 +378,8 @@ MonoBehaviour:
   maxCarryVelocity: 12
   carryRotateSpeed: 10
   stopDistance: 0.08
-  throwForce: 8
-  upwardThrowForce: 2
+  throwForce: 15
+  upwardThrowForce: 0.3
   minDiceSpinForce: 12
   maxDiceSpinForce: 20
 --- !u!4 &7886686834801078791 stripped

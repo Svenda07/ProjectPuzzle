@@ -529,7 +529,6 @@ public class FirstPersonController : MonoBehaviour
     private void HandleGlide()
     {
         isGliding = false;
-        
 
         if (AbilityManager.Instance == null || !AbilityManager.Instance.GlideUnlocked)
             return;
@@ -543,8 +542,10 @@ public class FirstPersonController : MonoBehaviour
         if (currentMovement.y > 0f)
             return;
 
+        if (airJumpsUsed < maxAirJumps)
+            return;
+
         isGliding = true;
-        
         currentMovement.y = Mathf.Max(currentMovement.y, glideFallSpeed);
     }
     private void TriggerDoubleJumpShake()
