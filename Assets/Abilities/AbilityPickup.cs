@@ -31,45 +31,45 @@ public class AbilityPickup : MonoBehaviour
         {
             case AbilityType.Jump:
                 AbilityManager.Instance.UnlockJump();
-                abilityName = "Jump";
+                abilityName = "Skok";
                 buttonName = "Space";
                 break;
 
             case AbilityType.Sprint:
                 AbilityManager.Instance.UnlockSprint();
-                abilityName = "Sprint";
+                abilityName = "Trcanje";
                 buttonName = "Left Shift";
                 break;
 
             case AbilityType.Crouch:
                 AbilityManager.Instance.UnlockCrouch();
-                abilityName = "Crouch";
+                abilityName = "Cucanj";
                 buttonName = "C";
                 break;
 
             case AbilityType.Dash:
                 AbilityManager.Instance.UnlockDash();
-                abilityName = "Dash";
+                abilityName = "Odgurivanje u zraku";
                 buttonName = "B";
                 break;
             case AbilityType.Grapple:
                 AbilityManager.Instance.UnlockGrapple();
-                abilityName = "Grapple Hook";
+                abilityName = "Kuka za penjanje";
                 buttonName = "Right Click";
                 break;
             case AbilityType.objectPickup:
                 AbilityManager.Instance.UnlockObjectPickup();
-                abilityName = "Object Pickup";
+                abilityName = "Podizanje objekata";
                 buttonName = "E";
                 break;
             case AbilityType.DoubleJump:
                 AbilityManager.Instance.UnlockDoubleJump();
-                abilityName = "Double Jump";
+                abilityName = "Dvostruki skok";
                 buttonName = "Space";
                 break;
             case AbilityType.Glide:
                 AbilityManager.Instance.UnlockGlide();
-                abilityName = "Glide";
+                abilityName = "Lebdenje";
                 buttonName = "Hold Space";
                 break;
         }

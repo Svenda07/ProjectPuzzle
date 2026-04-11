@@ -35,8 +35,8 @@ public class AbilityPopupUI : MonoBehaviour
             StopCoroutine(popupCoroutine);
         }
 
-        abilityNameText.text = abilityName + " Unlocked!";
-        buttonText.text = "Press " + buttonName + " to use";
+        abilityNameText.text = abilityName + " otkljucano!";
+        buttonText.text = "Pritnisni " + buttonName + " za koristenje";
 
         popupRoot.SetActive(true);
         popupCoroutine = StartCoroutine(HidePopupAfterDelay());
