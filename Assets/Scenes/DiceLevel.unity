@@ -16809,7 +16809,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6462498517494255824, guid: 30809f93b601b7b4ea94cc756a560eec, type: 3}
       propertyPath: nextSceneName
-      value: SampleScene
+      value: GrappleLevel
       objectReference: {fileID: 0}
     - target: {fileID: 7538401853653251451, guid: 30809f93b601b7b4ea94cc756a560eec, type: 3}
       propertyPath: m_LocalScale.y
@@ -34670,7 +34670,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7886686834801078791, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 10.1
+      value: 3.79
       objectReference: {fileID: 0}
     - target: {fileID: 7886686834801078791, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: m_LocalPosition.z
