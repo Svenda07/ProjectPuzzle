@@ -27,7 +27,7 @@ public class AbilityManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        /*  // Starting state: only walking is available
+         // Starting state: only walking is available
         JumpUnlocked = false;
          SprintUnlocked = false;
          CrouchUnlocked = false;
@@ -35,9 +35,9 @@ public class AbilityManager : MonoBehaviour
          GrappleUnlocked = false;
          objectPickupUnlocked = false;
          DoubleJumpUnlocked = false;
-         GlideUnlocked = false; */
+         GlideUnlocked = false; 
 
-           // Enable all abilities for now
+       /*    // Enable all abilities for now
         JumpUnlocked = true;
         SprintUnlocked = true;
         CrouchUnlocked = true;
@@ -45,7 +45,7 @@ public class AbilityManager : MonoBehaviour
         GrappleUnlocked = true;
         objectPickupUnlocked = true;
         DoubleJumpUnlocked = true;
-        GlideUnlocked = true;
+        GlideUnlocked = true;*/
 
     }
 
