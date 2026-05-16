@@ -34,7 +34,7 @@ public class AbilityManager : MonoBehaviour
          DashUnlocked = true;
          GrappleUnlocked = true;
          objectPickupUnlocked = true;
-       //  DoubleJumpUnlocked = false;
+      DoubleJumpUnlocked = true;
         // GlideUnlocked = false; 
         
        /*    // Enable all abilities for now
