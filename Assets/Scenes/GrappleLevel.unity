@@ -23476,7 +23476,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af04f676b4d05604983d684d6b59556e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickupobject
-  objectWeight: 40
+  objectWeight: 21
   maxCarryWeight: 15
   maxThrowWeight: 10
   canBePushed: 1
@@ -23490,7 +23490,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1131588338}
   serializedVersion: 5
-  m_Mass: 40
+  m_Mass: 21
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -23737,7 +23737,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1145914986}
   serializedVersion: 5
-  m_Mass: 40
+  m_Mass: 21
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -23768,7 +23768,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: af04f676b4d05604983d684d6b59556e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Pickupobject
-  objectWeight: 40
+  objectWeight: 21
   maxCarryWeight: 15
   maxThrowWeight: 10
   canBePushed: 1
@@ -41626,7 +41626,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7886686834801078791, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -96.15
+      value: -78.32
       objectReference: {fileID: 0}
     - target: {fileID: 7886686834801078791, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: m_LocalPosition.y

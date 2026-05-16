@@ -9,11 +9,8 @@ public class AbilityManager : MonoBehaviour
     public bool CrouchUnlocked { get; private set; }
     public bool DashUnlocked { get; private set; }
     public bool GrappleUnlocked { get; private set; }
-
     public bool objectPickupUnlocked { get; private set; }
-
     public bool DoubleJumpUnlocked { get; private set; }
-
     public bool GlideUnlocked { get; private set; }
 
     private void Awake()
@@ -27,65 +24,27 @@ public class AbilityManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-         // Starting state: only walking is available
-         JumpUnlocked = true;
-        // SprintUnlocked = false;
-         CrouchUnlocked = true;
-         DashUnlocked = true;
-         GrappleUnlocked = true;
-         objectPickupUnlocked = true;
-      DoubleJumpUnlocked = true;
-        // GlideUnlocked = false; 
-        
-       /*    // Enable all abilities for now
-        JumpUnlocked = true;
-        SprintUnlocked = true;
-        CrouchUnlocked = true;
-        DashUnlocked = true;
-        GrappleUnlocked = true;
-        objectPickupUnlocked = true;
-        DoubleJumpUnlocked = true;
-        GlideUnlocked = true;*/
-
+        ResetAbilities();
     }
 
-    public void UnlockJump()
+    public void ResetAbilities()
     {
-        JumpUnlocked = true;
+        JumpUnlocked = false;
+        SprintUnlocked = false;
+        CrouchUnlocked = false;
+        DashUnlocked = false;
+        GrappleUnlocked = false;
+        objectPickupUnlocked = false;
+        DoubleJumpUnlocked = false;
+        GlideUnlocked = false;
     }
 
-    public void UnlockSprint()
-    {
-        SprintUnlocked = true;
-    }
-
-    public void UnlockCrouch()
-    {
-        CrouchUnlocked = true;
-    }
-
-    public void UnlockDash()
-    {
-        DashUnlocked = true;
-    }
-
-    public void UnlockGrapple()
-    {
-        GrappleUnlocked = true;
-    }
-
-    public void UnlockObjectPickup()
-    {
-        objectPickupUnlocked = true;
-    }
-    public void UnlockDoubleJump()
-    {
-        DoubleJumpUnlocked = true;
-    }
-
-
-    public void UnlockGlide()
-    {
-        GlideUnlocked = true;
-    }
+    public void UnlockJump() => JumpUnlocked = true;
+    public void UnlockSprint() => SprintUnlocked = true;
+    public void UnlockCrouch() => CrouchUnlocked = true;
+    public void UnlockDash() => DashUnlocked = true;
+    public void UnlockGrapple() => GrappleUnlocked = true;
+    public void UnlockObjectPickup() => objectPickupUnlocked = true;
+    public void UnlockDoubleJump() => DoubleJumpUnlocked = true;
+    public void UnlockGlide() => GlideUnlocked = true;
 }
