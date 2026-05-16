@@ -25,7 +25,7 @@ public class CaesarCipher : MonoBehaviour
 
     private void Start()
     {
-        encodedShift = Random.Range(1, 7);
+        encodedShift = Random.Range(2, 7);
         encodedMessage = CaesarEncrypt(plainMessage, encodedShift);
 
         if (objectToSpawn1 != null)

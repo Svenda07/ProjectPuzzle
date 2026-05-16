@@ -22877,8 +22877,12 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 930224570}
     - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
+      propertyPath: glideFallSpeed
+      value: -3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: grapplePullSpeed
-      value: 20
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: playerInputHandler
@@ -22888,6 +22892,10 @@ PrefabInstance:
       propertyPath: validGrappleReticle
       value: 
       objectReference: {fileID: 428969612}
+    - target: {fileID: 4181979050332789018, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
+      propertyPath: grappleAutoReleaseDistance
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 6590648440539661701, guid: e98d5434971cb3a4498747c40a7a5a02, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.264

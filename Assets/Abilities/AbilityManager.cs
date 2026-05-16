@@ -28,15 +28,15 @@ public class AbilityManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
          // Starting state: only walking is available
-        JumpUnlocked = false;
-         SprintUnlocked = false;
-         CrouchUnlocked = false;
-         DashUnlocked = false;
-         GrappleUnlocked = false;
-         objectPickupUnlocked = false;
-         DoubleJumpUnlocked = false;
-         GlideUnlocked = false; 
-
+         JumpUnlocked = true;
+        // SprintUnlocked = false;
+         CrouchUnlocked = true;
+         DashUnlocked = true;
+         GrappleUnlocked = true;
+         objectPickupUnlocked = true;
+       //  DoubleJumpUnlocked = false;
+        // GlideUnlocked = false; 
+        
        /*    // Enable all abilities for now
         JumpUnlocked = true;
         SprintUnlocked = true;

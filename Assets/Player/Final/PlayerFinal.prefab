@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 7011788507742367898}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.07, z: 1.8}
+  m_LocalPosition: {x: 0, y: 1.07, z: 2.722}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -234,7 +234,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2639656269629339227, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: grapplePullSpeed
-      value: 30
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2639656269629339227, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: gravityMultiplier
@@ -251,6 +251,10 @@ PrefabInstance:
     - target: {fileID: 2639656269629339227, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: glideGravityMultiplier
       value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2639656269629339227, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
+      propertyPath: grappleAutoReleaseDistance
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3042313439706121499, guid: ecf686bd57982b748b8f70d424cd6171, type: 3}
       propertyPath: m_Layer

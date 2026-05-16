@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FirstPersonController : MonoBehaviour
@@ -40,6 +39,7 @@ public class FirstPersonController : MonoBehaviour
     private int grappleBlockerLayer => ~LayerMask.GetMask("Player");
     [SerializeField] private float maxGrappleDistance = 20f;
     [SerializeField] private float grapplePullSpeed = 20f;
+    [SerializeField] private float grappleAutoReleaseDistance = 2f;
     [SerializeField] private Transform grappleOrigin;
     [SerializeField] private LineRenderer grappleLine;
 
@@ -51,18 +51,16 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private CharacterController characterController;
     [SerializeField] private Camera mainCamera;
     [SerializeField] private PlayerInputHandler playerInputHandler;
-    
+
     [Header("Grapple Momentum")]
     [SerializeField] private float grappleMomentumSmoothTime = 0.4f;
 
     [Header("Extra Jump")]
-
     [SerializeField] private int maxAirJumps = 1;
     [SerializeField] private float extraJumpForce = 5f;
 
     [Header("Glide")]
     [SerializeField] private float glideFallSpeed = -3f;
-   
     [SerializeField] private float glideMoveBoost = 1.1f;
 
     [Header("Camera Effects")]
@@ -76,14 +74,12 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private float doubleJumpShakeAmount = 0.08f;
 
     private bool isGliding;
-
     private int airJumpsUsed;
     private bool wasGroundedLastFrame;
 
     private Vector3 grappleReleaseMomentum;
     private float grappleMomentumXSmoothing;
     private float grappleMomentumZSmoothing;
-
 
     private float fovVelocity;
     private Coroutine doubleJumpShakeCoroutine;
@@ -101,14 +97,15 @@ public class FirstPersonController : MonoBehaviour
     private float dashTimer;
     private float dashCooldownTimer;
     private Vector3 dashDirection;
+    private bool dashRechargePending;
 
     private RaycastHit slopeHit;
     private bool isSlidingOnSlope;
 
-
     private bool isPullGrappling;
     private Vector3 grapplePoint;
     private Vector3 grappleVelocity;
+
     private float CurrentSpeed
     {
         get
@@ -152,23 +149,17 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
-      
-        if (dashCooldownTimer > 0f)
-        {
-            dashCooldownTimer -= Time.deltaTime;
-        }
-
         HandleDash();
         HandleCrouch();
         HandleMovement();
         HandleRotation();
         HandleGrapple();
-        UpdateGrappleLine(); 
+        UpdateGrappleLine();
         UpdateReticle();
-        playerInputHandler.ClearFrameInput();
-        HandleGlide();
         HandleCameraFOV();
+        playerInputHandler.ClearFrameInput();
     }
+
     private void HandleCameraFOV()
     {
         float targetFOV = normalFOV;
@@ -180,7 +171,6 @@ public class FirstPersonController : MonoBehaviour
         else if (isGliding)
         {
             targetFOV = glideFOV;
-
         }
 
         mainCamera.fieldOfView = Mathf.SmoothDamp(
@@ -197,6 +187,7 @@ public class FirstPersonController : MonoBehaviour
         Vector3 worldDirection = transform.TransformDirection(inputDirection);
         return worldDirection.normalized;
     }
+
     private void UpdateReticle()
     {
         if (normalReticle == null || validGrappleReticle == null)
@@ -218,13 +209,18 @@ public class FirstPersonController : MonoBehaviour
         normalReticle.SetActive(!validTarget);
         validGrappleReticle.SetActive(validTarget);
     }
+
     private void HandleJumping()
     {
         bool isGrounded = characterController.isGrounded;
 
         if (isGrounded)
         {
-            currentMovement.y = -0.5f;
+            if (currentMovement.y < 0f)
+            {
+                currentMovement.y = -0.5f;
+            }
+
             airJumpsUsed = 0;
 
             if (AbilityManager.Instance != null &&
@@ -243,20 +239,19 @@ public class FirstPersonController : MonoBehaviour
                 AbilityManager.Instance.DoubleJumpUnlocked &&
                 airJumpsUsed < maxAirJumps;
 
-            if (playerInputHandler.JumpTriggered && canUseExtraJump && currentMovement.y <= 0f)
+            if (playerInputHandler.JumpTriggered && canUseExtraJump)
             {
                 currentMovement.y = extraJumpForce;
                 airJumpsUsed++;
+                isGliding = false;
                 TriggerDoubleJumpShake();
             }
 
-            if (!isGliding)
+            if (!isGliding && !isPullGrappling)
             {
                 currentMovement.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
             }
         }
-
-        wasGroundedLastFrame = isGrounded;
     }
 
     private void HandleMovement()
@@ -274,6 +269,7 @@ public class FirstPersonController : MonoBehaviour
         else if (isPullGrappling)
         {
             currentMovement.x = grappleVelocity.x;
+            currentMovement.y = grappleVelocity.y;
             currentMovement.z = grappleVelocity.z;
         }
         else if (isSlidingOnSlope)
@@ -284,15 +280,24 @@ public class FirstPersonController : MonoBehaviour
         }
         else if (characterController.isGrounded)
         {
-            currentMovement.x = targetHorizontalMovement.x;
-            currentMovement.z = targetHorizontalMovement.z;
+            currentMovement.x = targetHorizontalMovement.x + grappleReleaseMomentum.x;
+            currentMovement.z = targetHorizontalMovement.z + grappleReleaseMomentum.z;
         }
         else
         {
             float currentAirControl = isGliding ? airControl * glideMoveBoost : airControl;
 
-            currentMovement.x = Mathf.Lerp(currentMovement.x, targetHorizontalMovement.x, currentAirControl * Time.deltaTime);
-            currentMovement.z = Mathf.Lerp(currentMovement.z, targetHorizontalMovement.z, currentAirControl * Time.deltaTime);
+            currentMovement.x = Mathf.Lerp(
+                currentMovement.x,
+                targetHorizontalMovement.x + grappleReleaseMomentum.x,
+                currentAirControl * Time.deltaTime
+            );
+
+            currentMovement.z = Mathf.Lerp(
+                currentMovement.z,
+                targetHorizontalMovement.z + grappleReleaseMomentum.z,
+                currentAirControl * Time.deltaTime
+            );
         }
 
         grappleReleaseMomentum.x = Mathf.SmoothDamp(
@@ -311,12 +316,19 @@ public class FirstPersonController : MonoBehaviour
 
         HandleJumping();
         HandleGlide();
+
         characterController.Move(currentMovement * Time.deltaTime);
     }
 
     private void HandleCrouch()
     {
-        if (AbilityManager.Instance == null || !AbilityManager.Instance.CrouchUnlocked)
+        if (!characterController.isGrounded)
+        {
+            isCrouching = false;
+            targetHeight = standingHeight;
+            targetCameraLocalPosition = standingCameraLocalPosition;
+        }
+        else if (AbilityManager.Instance == null || !AbilityManager.Instance.CrouchUnlocked)
         {
             isCrouching = false;
             targetHeight = standingHeight;
@@ -368,7 +380,8 @@ public class FirstPersonController : MonoBehaviour
         float bottomY = worldCenter.y - (characterController.height / 2f) + radius;
         Vector3 bottom = new Vector3(worldCenter.x, bottomY, worldCenter.z);
 
-        Vector3 top = bottom + Vector3.up * (standingHeight - radius * 2f);
+        float standingTopY = worldCenter.y + (standingHeight / 2f) - radius;
+        Vector3 top = new Vector3(worldCenter.x, standingTopY, worldCenter.z);
 
         int layerMask = ~LayerMask.GetMask("Player");
 
@@ -403,7 +416,21 @@ public class FirstPersonController : MonoBehaviour
         if (AbilityManager.Instance == null || !AbilityManager.Instance.DashUnlocked)
             return;
 
-        if (!isDashing && dashCooldownTimer <= 0f && playerInputHandler.DashTriggered)
+        bool isGrounded = characterController.isGrounded;
+        bool justLanded = !wasGroundedLastFrame && isGrounded;
+
+        if (justLanded && dashRechargePending)
+        {
+            dashRechargePending = false;
+            dashCooldownTimer = dashCooldown;
+        }
+
+        if (dashCooldownTimer > 0f)
+        {
+            dashCooldownTimer -= Time.deltaTime;
+        }
+
+        if (!isDashing && !dashRechargePending && dashCooldownTimer <= 0f && playerInputHandler.DashTriggered)
         {
             StopGrapple(false);
 
@@ -414,7 +441,6 @@ public class FirstPersonController : MonoBehaviour
 
             isDashing = true;
             dashTimer = dashDuration;
-            dashCooldownTimer = dashCooldown;
 
             dashDirection = mainCamera.transform.forward;
             dashDirection.y = 0f;
@@ -428,9 +454,21 @@ public class FirstPersonController : MonoBehaviour
             if (dashTimer <= 0f)
             {
                 isDashing = false;
+
+                if (isGrounded)
+                {
+                    dashCooldownTimer = dashCooldown;
+                }
+                else
+                {
+                    dashRechargePending = true;
+                }
             }
         }
+
+        wasGroundedLastFrame = isGrounded;
     }
+
     private void HandleGrapple()
     {
         if (AbilityManager.Instance == null || !AbilityManager.Instance.GrappleUnlocked)
@@ -448,12 +486,10 @@ public class FirstPersonController : MonoBehaviour
 
         if (isPullGrappling)
         {
-            Vector3 directionToPoint = (grapplePoint - transform.position).normalized;
+            Vector3 directionToPoint = (grapplePoint - characterController.bounds.center).normalized;
             grappleVelocity = directionToPoint * grapplePullSpeed;
 
-            characterController.Move(grappleVelocity * Time.deltaTime);
-
-            if (Vector3.Distance(transform.position, grapplePoint) < 2f)
+            if (Vector3.Distance(characterController.bounds.center, grapplePoint) <= grappleAutoReleaseDistance)
             {
                 StopGrapple();
             }
@@ -474,6 +510,7 @@ public class FirstPersonController : MonoBehaviour
             {
                 grapplePoint = hit.point;
                 isPullGrappling = true;
+                isGliding = false;
                 grappleVelocity = Vector3.zero;
 
                 if (grappleLine != null)
@@ -505,6 +542,7 @@ public class FirstPersonController : MonoBehaviour
             grappleLine.enabled = false;
         }
     }
+
     private void UpdateGrappleLine()
     {
         if (grappleLine == null)
@@ -526,9 +564,13 @@ public class FirstPersonController : MonoBehaviour
         grappleLine.SetPosition(0, startPoint);
         grappleLine.SetPosition(1, endPoint);
     }
+
     private void HandleGlide()
     {
         isGliding = false;
+
+        if (isPullGrappling)
+            return;
 
         if (AbilityManager.Instance == null || !AbilityManager.Instance.GlideUnlocked)
             return;
@@ -546,8 +588,9 @@ public class FirstPersonController : MonoBehaviour
             return;
 
         isGliding = true;
-        currentMovement.y = Mathf.Max(currentMovement.y, glideFallSpeed);
+        currentMovement.y = glideFallSpeed;
     }
+
     private void TriggerDoubleJumpShake()
     {
         if (cameraEffectHolder == null)
@@ -560,6 +603,7 @@ public class FirstPersonController : MonoBehaviour
 
         doubleJumpShakeCoroutine = StartCoroutine(DoubleJumpShakeRoutine());
     }
+
     private IEnumerator DoubleJumpShakeRoutine()
     {
         float elapsed = 0f;
@@ -577,6 +621,7 @@ public class FirstPersonController : MonoBehaviour
 
         cameraEffectHolder.localPosition = cameraEffectHolderOriginalLocalPos;
     }
+
     private void ApplyHorizontalRotation(float rotationAmount)
     {
         transform.Rotate(0, rotationAmount, 0);
