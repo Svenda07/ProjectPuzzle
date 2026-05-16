@@ -38,8 +38,10 @@ public class FirstPersonController : MonoBehaviour
     [SerializeField] private LayerMask grappableLayer;
     private int grappleBlockerLayer => ~LayerMask.GetMask("Player");
     [SerializeField] private float maxGrappleDistance = 20f;
-    [SerializeField] private float grapplePullSpeed = 20f;
-    [SerializeField] private float grappleAutoReleaseDistance = 2f;
+    [SerializeField] private float grappleHorizontalPullSpeed = 10f;
+    [SerializeField] private float grappleVerticalPullSpeed = 6f;
+    [SerializeField] private float grappleMaxPullSpeed = 12f;
+    [SerializeField] private float grappleAutoReleaseDistance = 10f;
     [SerializeField] private Transform grappleOrigin;
     [SerializeField] private LineRenderer grappleLine;
 
@@ -486,8 +488,30 @@ public class FirstPersonController : MonoBehaviour
 
         if (isPullGrappling)
         {
-            Vector3 directionToPoint = (grapplePoint - characterController.bounds.center).normalized;
-            grappleVelocity = directionToPoint * grapplePullSpeed;
+            Vector3 toPoint = grapplePoint - characterController.bounds.center;
+
+            float horizontalDistance = new Vector2(toPoint.x, toPoint.z).magnitude;
+            float verticalDistance = toPoint.y;
+
+            Vector3 horizontalDirection = new Vector3(toPoint.x, 0f, toPoint.z).normalized;
+
+            Vector3 horizontalPull = horizontalDirection * grappleHorizontalPullSpeed;
+            Vector3 verticalPull = Vector3.up * Mathf.Sign(verticalDistance) * grappleVerticalPullSpeed;
+
+            if (Mathf.Abs(verticalDistance) < 0.1f)
+            {
+                verticalPull = Vector3.zero;
+            }
+
+            if (horizontalDistance < 1f)
+            {
+                horizontalPull = Vector3.zero;
+            }
+
+            float pullStrength = Mathf.Clamp01(toPoint.magnitude / maxGrappleDistance);
+
+            grappleVelocity = (horizontalPull + verticalPull) * pullStrength;
+            grappleVelocity = Vector3.ClampMagnitude(grappleVelocity, grappleMaxPullSpeed);
 
             if (Vector3.Distance(characterController.bounds.center, grapplePoint) <= grappleAutoReleaseDistance)
             {
