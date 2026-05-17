@@ -133,24 +133,23 @@ public class FirstPersonController : MonoBehaviour
 
     void Start()
     {
+        mouseSensitivity = PlayerPrefs.GetFloat("MouseSensitivity", mouseSensitivity);
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
         standingHeight = characterController.height;
         standingCameraLocalPosition = mainCamera.transform.localPosition;
-
         targetHeight = standingHeight;
         targetCameraLocalPosition = standingCameraLocalPosition;
         mainCamera.fieldOfView = normalFOV;
-
-        if (cameraEffectHolder != null)
-        {
-            cameraEffectHolderOriginalLocalPos = cameraEffectHolder.localPosition;
-        }
     }
 
     void Update()
     {
+        if (Time.timeScale == 0f)
+            return;
+
         HandleDash();
         HandleCrouch();
         HandleMovement();
@@ -664,5 +663,16 @@ public class FirstPersonController : MonoBehaviour
 
         ApplyHorizontalRotation(mouseXRotation);
         ApplyVerticalRotation(mouseYRotation);
+    }
+    public float GetMouseSensitivity()
+    {
+        return mouseSensitivity;
+    }
+
+    public void SetMouseSensitivity(float value)
+    {
+        mouseSensitivity = value;
+        PlayerPrefs.SetFloat("MouseSensitivity", mouseSensitivity);
+        PlayerPrefs.Save();
     }
 }

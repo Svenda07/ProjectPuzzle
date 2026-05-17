@@ -24,6 +24,7 @@ public class PlayerInputHandler : MonoBehaviour
     [SerializeField] private string objectPickup = "PickUp";
     [SerializeField] private string objectThrow = "Throw";
     [SerializeField] private string resetPickups = "ResetPickups";
+    [SerializeField] private string pause = "Pause";
 
     private InputAction movementAction;
     private InputAction rotationAction;
@@ -35,6 +36,8 @@ public class PlayerInputHandler : MonoBehaviour
     private InputAction objectPickupAction;
     private InputAction objectThrowAction;
     private InputAction resetPickupsAction;
+    private InputAction pauseAction;
+
 
     public Vector2 MovementInput { get; private set; }
     public Vector2 RotationInput { get; private set; }
@@ -48,6 +51,8 @@ public class PlayerInputHandler : MonoBehaviour
     public bool ObjectPickupTriggered { get; private set; }
     public bool ObjectThrowTriggered { get; private set; }
     public bool ResetPickupsTriggered { get; private set; }
+    public bool PausePressedThisFrame { get; private set; }
+
 
 
     private void Awake()
@@ -65,7 +70,7 @@ public class PlayerInputHandler : MonoBehaviour
         objectPickupAction = mapReference.FindAction(objectPickup);
         objectThrowAction = mapReference.FindAction(objectThrow);
         resetPickupsAction = mapReference.FindAction(resetPickups);
-
+        pauseAction = mapReference.FindAction(pause);
 
 
 
@@ -111,10 +116,14 @@ public class PlayerInputHandler : MonoBehaviour
         objectPickupAction.performed += inputInfo => ObjectPickupTriggered = true;
         objectThrowAction.performed += inputInfo => ObjectThrowTriggered = true;
         resetPickupsAction.performed += inputInfo => ResetPickupsTriggered = true;
+        var map = playerControls.FindActionMap(actionMapName);
+        pauseAction = map.FindAction(pause);
+        pauseAction.performed += _ => PausePressedThisFrame = true;
     }
     public void ClearFrameInput()
     {
         JumpTriggered = false;
+        PausePressedThisFrame = false;
     }
     private void LateUpdate()
     {
