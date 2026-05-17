@@ -86,13 +86,13 @@ public class MusicManager : MonoBehaviour
             case "Tutorial":
                 return menuMusic;
 
-            case "Level1":
+            case "DiceLevel":
                 return level1Music;
 
-            case "Level2":
+            case "GrappleLevel":
                 return level2Music;
 
-            case "Level3":
+            case "FinalLevel":
                 return level3Music;
 
             default:
